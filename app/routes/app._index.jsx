@@ -3,7 +3,7 @@ import { useFetcher, useLoaderData } from "react-router";
 import { useAppBridge } from "@shopify/app-bridge-react";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-
+import { Edit3 } from "lucide-react";
 
 /* -------------------- LOADER (FETCH PRODUCTS) -------------------- */
 export const loader = async ({ request }) => {
@@ -12,7 +12,7 @@ export const loader = async ({ request }) => {
   const response = await admin.graphql(`
     #graphql
     query {
-      products(first: 5) {
+      products(first: 50) {
         edges {
           node {
             id
@@ -108,44 +108,66 @@ export default function Index() {
         Generate a product
       </s-button>
 
-      {/* ---------------- PRODUCTS LIST ---------------- */}
-      <s-section heading="Products">
-        {products.length === 0 ? (
-          <s-paragraph>No products found</s-paragraph>
-        ) : (
-          <s-stack direction="block" gap="base">
-            {products.map(product => {
-              const price =
-                product.variants?.edges?.[0]?.node?.price ?? "N/A";
 
-              return (
-                <s-box
-                  key={product.id}
-                  padding="base"
-                  borderWidth="base"
-                  borderRadius="base"
-                >
-                  <s-heading>{product.title}</s-heading>
-                  <s-text>Status: {product.status}</s-text>
-                  <s-text>Price: {price}</s-text>
+<s-section heading="Products">
+  {products.length === 0 ? (
+    <s-paragraph>No products found</s-paragraph>
+  ) : (
+    <s-stack direction="block" gap="base">
+      {products.map((product) => {
+        const price =
+          product.variants?.edges?.[0]?.node?.price ?? "N/A";
 
-                  <s-button
-                    variant="tertiary"
-                    onClick={() =>
-                      shopify.intents.invoke?.(
-                        "edit:shopify/Product",
-                        { value: product.id }
-                      )
-                    }
-                  >
-                    Edit product
-                  </s-button>
-                </s-box>
-              );
-            })}
-          </s-stack>
-        )}
-      </s-section>
+        return (
+          <s-box
+            key={product.id}
+            padding="base"
+            borderWidth="base"
+            borderRadius="base"
+            position="relative"
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              minHeight: "120px",
+            }}
+          >
+            {/* Edit icon top-right */}
+            <s-button
+              variant="tertiary"
+              onClick={() =>
+                shopify.intents.invoke?.("edit:shopify/Product", {
+                  value: product.id,
+                })
+              }
+              style={{
+                position: "absolute",
+                top: "10px",
+                right: "10px",
+                width: "36px",
+                height: "36px",
+                padding: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Edit3 size={18} />
+            </s-button>
+
+            {/* Product info */}
+            <div style={{ paddingRight: "50px" }}>
+              <s-heading size="small">{product.title}</s-heading>
+              <s-text>Status: {product.status}</s-text>
+              <s-text>Price: {price}</s-text>
+            </div>
+          </s-box>
+        );
+      })}
+    </s-stack>
+  )}
+</s-section>
+
     </s-page>
   );
 }
